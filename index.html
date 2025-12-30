@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTPU 通識試排系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white shadow-sm mb-4 sticky-top" style="background-color: var(--bg-card) !important; border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1 fw-bold" style="color: var(--text-main);">🎓 NTPU 通識試排系統 <span class="badge bg-primary rounded-pill fs-6">v1</span></span>
+        <div class="d-flex align-items-center gap-3">
+            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2" onclick="toggleTheme()" id="theme-btn">
+                <span>🌙</span> 切換日夜模式
+            </button>
+            <button class="btn btn-outline-primary btn-sm" onclick="copyShareLink()" title="複製網址給朋友">
+                🔗 分享
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container main-content">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card p-3 mb-3 shadow-sm border-0">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0">🏆 志願排序 (可拖曳)</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <small class="text-muted" id="wish-count">0 門</small>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearWishlist()">🗑️ 清空</button>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush small" id="wish-list">
+                    <li class="list-group-item text-muted text-center py-4 rounded" style="background: var(--grid-hover);">尚未加入課程</li>
+                </ul>
+            </div>
+
+            <div class="card p-3 mb-3 shadow-sm border-0">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0">📅 屏蔽時段</h6>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearBlocked()">🗑️ 清除</button>
+                </div>
+
+                <div class="time-grid" id="time-grid"></div>
+
+                <div class="mt-3 text-muted" style="font-size: 0.75rem;">
+                    <div class="d-flex gap-3 mb-1">
+                        <span class="d-flex align-items-center"><span style="width:12px;height:12px;background:var(--wishlist-bg);border:1px solid #ccc;margin-right:4px;"></span>已選課程</span>
+                        <span class="d-flex align-items-center"><span style="width:12px;height:12px;background:repeating-linear-gradient(45deg,transparent,transparent 2px,#999 2px,#999 3px);border:1px solid #ccc;margin-right:4px;"></span>屏蔽時段</span>
+                    </div>
+                    💡 提示：點擊格子可「屏蔽」該時段。
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card p-3 mb-3 border-0 shadow-sm">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-5 col-12"> <input type="text" id="search-input" class="form-control" placeholder="🔍 搜尋課名、老師..." 
+                               style="background: var(--bg-body); color: var(--text-main); border-color: var(--border-color);"
+                               oninput="renderCourses()">
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <div class="input-group sort-wrapper">
+                            <label class="input-group-text bg-transparent border-secondary text-muted transition-effect" for="sort-select">⇅ 排序</label>
+                            <select class="form-select border-secondary transition-effect" id="sort-select" onchange="renderCourses()" style="background: var(--bg-body); color: var(--text-main);">
+                                <option value="dim" selected>依向度</option>
+                                <option value="time">依時間</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-12">
+                        <div class="btn-group w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary view-btn active" id="btn-grid" onclick="setViewMode('grid')">⊞ 方格</button>
+                            <button type="button" class="btn btn-outline-secondary view-btn" id="btn-list" onclick="setViewMode('list')">☰ 列表</button>
+                        </div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div id="dimension-filters"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small" id="result-count">載入中...</span>
+            </div>
+            
+            <div class="row g-3" id="course-list"></div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-4 mt-4" style="border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
+    <div class="container">
+        © 2025 黃振彰 · <a href="https://github.com/huangzz02" target="_blank" class="footer-link">GitHub</a>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
