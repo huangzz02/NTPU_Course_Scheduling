@@ -32,17 +32,47 @@ function initTimeGrid() {
     const days = ['一', '二', '三', '四', '五'];
     const periods = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     
-    grid.innerHTML += `<div></div>`;
-    days.forEach(d => grid.innerHTML += `<div class="grid-header">${d}</div>`);
+    let html = '<div class="table-responsive"><table class="table table-bordered table-sm mb-0">';
     
+    // Header
+    html += '<thead><tr><th style="width:40px;"></th>'; // Corner
+    days.forEach(d => html += `<th scope="col">${d}</th>`);
+    html += '</tr></thead>';
+
+    // Body
+    html += '<tbody>';
     periods.forEach(p => {
-        grid.innerHTML += `<div class="grid-header">${p}</div>`;
+        html += `<tr><th scope="row">${p}</th>`;
         days.forEach((d, index) => {
             const dayNum = index + 1;
             const slotId = `${dayNum}-${p}`;
+            html += `<td id="slot-${slotId}" onclick="handleCellClick(event, '${slotId}')" style="cursor: pointer;">
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center">
+                    <input class="form-check-input mt-0" type="checkbox" id="chk-${slotId}" value="${slotId}" aria-label="屏蔽 星期${d} 第${p}節">
+                </div>
+            </td>`;
             grid.innerHTML += `<div class="grid-cell" id="slot-${slotId}" role="button" tabindex="0" aria-label="星期${d} 第${p}節" onclick="toggleBlockSlot('${slotId}')" onkeydown="handleGridKeyDown(event, '${slotId}')"></div>`;
         });
+        html += '</tr>';
     });
+    html += '</tbody></table></div>';
+
+    grid.innerHTML = html;
+}
+
+function handleCellClick(event, slotId) {
+    // If clicking directly on the checkbox, let it change natively, then sync
+    // If clicking on the cell (td), toggle the checkbox manually
+    if (event.target.tagName !== 'INPUT') {
+        const chk = document.getElementById(`chk-${slotId}`);
+        if (chk) {
+            chk.checked = !chk.checked;
+            toggleBlockSlot(slotId);
+        }
+    } else {
+        // If it is the input, just run the logic (checkbox state already toggled by browser)
+        toggleBlockSlot(slotId);
+    }
 }
 
 function handleGridKeyDown(event, slotId) {
@@ -60,7 +90,14 @@ function toggleBlockSlot(slotId) {
 }
 
 function updateGridDisplay() {
-    document.querySelectorAll('.grid-cell').forEach(el => el.className = 'grid-cell');
+    // Clear all visuals
+    document.querySelectorAll('td[id^="slot-"]').forEach(td => {
+        td.classList.remove('cell-blocked', 'cell-wishlist');
+        const chk = td.querySelector('input');
+        if(chk) chk.checked = false;
+    });
+
+    // Apply Wishlist
     mySchedule.forEach(cid => {
         const course = rawData.find(c => c.id === cid);
         if(course) {
@@ -71,9 +108,15 @@ function updateGridDisplay() {
             });
         }
     });
+
+    // Apply Blocked
     blockedSlots.forEach(id => {
         const el = document.getElementById(`slot-${id}`);
-        if (el) el.classList.add('cell-blocked');
+        if (el) {
+            el.classList.add('cell-blocked');
+            const chk = el.querySelector('input');
+            if(chk) chk.checked = true;
+        }
     });
 }
 
