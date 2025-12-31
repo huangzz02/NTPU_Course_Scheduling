@@ -51,6 +51,7 @@ function initTimeGrid() {
                     <input class="form-check-input mt-0" type="checkbox" id="chk-${slotId}" value="${slotId}" aria-label="屏蔽 星期${d} 第${p}節">
                 </div>
             </td>`;
+            grid.innerHTML += `<div class="grid-cell" id="slot-${slotId}" role="button" tabindex="0" aria-label="星期${d} 第${p}節" onclick="toggleBlockSlot('${slotId}')" onkeydown="handleGridKeyDown(event, '${slotId}')"></div>`;
         });
         html += '</tr>';
     });
@@ -70,6 +71,13 @@ function handleCellClick(event, slotId) {
         }
     } else {
         // If it is the input, just run the logic (checkbox state already toggled by browser)
+        toggleBlockSlot(slotId);
+    }
+}
+
+function handleGridKeyDown(event, slotId) {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
         toggleBlockSlot(slotId);
     }
 }
