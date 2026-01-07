@@ -1,125 +1,313 @@
 <!DOCTYPE html>
 <html lang="zh-TW" data-theme="light">
 <head>
+    <!-- ==========================================
+         Google Analytics 追蹤代碼
+         用途：追蹤網站流量和使用者行為
+         ========================================== -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DCRLDNYHL7"></script>
     <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-DCRLDNYHL7');
     </script>
 
+    <!-- 基本 Meta 標籤 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NTPU 通識試排系統</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    
+    <!-- 外部 CSS 資源 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> <!-- Font Awesome 圖示庫 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"> <!-- Bootstrap 5 框架 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/> <!-- Driver.js CSS -->
+    <link href="style.css" rel="stylesheet"> <!-- 自訂樣式表 -->
 </head>
 <body>
 
-<nav class="navbar navbar-light bg-white shadow-sm mb-4 sticky-top" style="background-color: var(--bg-card) !important; border-bottom: 1px solid var(--border-color);">
+<!-- ==========================================
+     導航列
+     用途：顯示網站標題、版本號和功能按鈕
+     ========================================== -->
+<nav class="navbar navbar-light shadow-sm mb-4 sticky-top" style="background-color: var(--bg-elevated) !important; border-bottom: 1px solid var(--border);">
     <div class="container">
-        <span class="navbar-brand mb-0 h1 fw-bold" style="color: var(--text-main);">🎓 NTPU 通識試排系統 <span class="badge bg-primary rounded-pill fs-6">v1.1.2</span></span>
+        <!-- 網站標題和版本徽章 -->
+        <span class="navbar-brand mb-0 h1 fw-bold" style="color: var(--text-dark);">
+            NTPU 通識試排系統 
+            <span class="badge bg-primary rounded-pill fs-6" style="background-color: var(--primary) !important;">v2.0.0</span>
+        </span>
+        
+        <!-- 功能按鈕群組 -->
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2" onclick="toggleTheme()" id="theme-btn">
-                <span>🌙</span> 切換日夜模式
+             <!-- 教學說明按鈕 (新增) - 直接嵌入 SVG 以確保載入一體性 -->
+             <button class="btn btn-ghost btn-sm d-flex align-items-center gap-2" onclick="startTour(true)" id="help-btn" title="使用教學">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+             </button>
+
+            <!-- 主題切換按鈕（淺色/深色模式） -->
+            <button class="btn btn-ghost btn-sm d-flex align-items-center gap-2" onclick="toggleTheme()" id="theme-btn" title="切換主題">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
             </button>
-            <button class="btn btn-outline-primary btn-sm" onclick="copyShareLink()" title="複製網址給朋友">
-                🔗 分享
+            
+            <!-- 分享連結按鈕 -->
+            <button class="btn btn-ghost btn-sm d-flex align-items-center gap-2" onclick="copyShareLink()" title="複製網址給朋友" style="color: var(--primary);">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
             </button>
         </div>
     </div>
 </nav>
 
+<!-- ==========================================
+     主要內容區
+     ========================================== -->
 <div class="container main-content">
     <div class="row g-4">
+        
+        <!-- ==========================================
+             左側欄：志願清單 + 時段屏蔽
+             ========================================== -->
         <div class="col-lg-4">
-            <div class="card p-3 mb-3 shadow-sm border-0">
+            
+            <!-- 志願排序卡片 -->
+            <div class="card static-card p-3 mb-3 shadow-sm border-0" id="card-wishlist" style="background: var(--bg-elevated); border: 1px solid var(--border) !important;">
+                <!-- 卡片標題列 -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold mb-0">🏆 志願排序 (可拖曳)</h6>
+                    <h6 class="fw-bold mb-0" style="color: var(--text-dark)">志願排序 (可拖曳)</h6>
                     <div class="d-flex align-items-center gap-2">
-                        <small class="text-muted" id="wish-count">0 門</small>
-                        <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearWishlist()">🗑️ 清空</button>
+                        <small class="text-muted" id="wish-count">0 門</small> <!-- 課程數量顯示 -->
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearWishlist()">清空</button>
                     </div>
                 </div>
+                
+                <!-- 志願清單容器（動態生成內容） -->
                 <ul class="list-group list-group-flush small" id="wish-list">
-                    <li class="list-group-item text-muted text-center py-4 rounded" style="background: var(--grid-hover);">尚未加入課程</li>
+                    <li class="list-group-item text-muted text-center py-4 rounded" style="background: var(--bg-base); border: 1px dashed var(--border);">尚未加入課程</li>
                 </ul>
             </div>
 
-            <div class="card p-3 mb-3 shadow-sm border-0">
+            <!-- 屏蔽時段卡片 -->
+            <div class="card static-card p-3 mb-3 shadow-sm border-0" id="card-blocked" style="background: var(--bg-elevated); border: 1px solid var(--border) !important;">
+                <!-- 卡片標題列 -->
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="fw-bold mb-0">📅 屏蔽時段</h6>
-                    <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearBlocked()">🗑️ 清除</button>
+                    <h6 class="fw-bold mb-0" style="color: var(--text-dark)">屏蔽時段</h6>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.8rem; height: 24px; line-height: 1;" onclick="clearBlocked()">重置</button>
                 </div>
 
+                <!-- 時段選擇網格（動態生成內容） -->
                 <div class="time-grid" id="time-grid"></div>
 
+                <!-- 圖例說明 -->
                 <div class="mt-3 text-muted" style="font-size: 0.75rem;">
                     <div class="d-flex gap-3 mb-1">
-                        <span class="d-flex align-items-center"><span style="width:12px;height:12px;background:var(--wishlist-bg);border:1px solid #ccc;margin-right:4px;"></span>已選課程</span>
-                        <span class="d-flex align-items-center"><span style="width:12px;height:12px;background:repeating-linear-gradient(45deg,transparent,transparent 2px,#999 2px,#999 3px);border:1px solid #ccc;margin-right:4px;"></span>屏蔽時段</span>
+                        <span class="d-flex align-items-center">
+                            <span style="width:12px;height:12px;background:var(--wishlist-bg);border:1px solid #ccc;margin-right:4px;"></span>已選課程
+                        </span>
+                        <span class="d-flex align-items-center">
+                            <span style="width:12px;height:12px;background:repeating-linear-gradient(45deg,transparent,transparent 2px,var(--blocked-color) 2px,var(--blocked-color) 3px);border:1px solid #ccc;margin-right:4px;"></span>屏蔽時段
+                        </span>
                     </div>
-                    💡 提示：點擊格子可「屏蔽」該時段。
                 </div>
             </div>
         </div>
 
+        <!-- ==========================================
+             右側欄：課程搜尋與列表
+             ========================================== -->
         <div class="col-lg-8">
-            <div class="card p-3 mb-3 border-0 shadow-sm">
-                <div class="row g-2 align-items-center">
-                    <div class="col-md-5 col-12"> <input type="text" id="search-input" class="form-control" placeholder="🔍 搜尋課名、老師..." 
-                               style="background: var(--bg-body); color: var(--text-main); border-color: var(--border-color);"
-                               oninput="renderCourses()">
+            
+            <!-- ==========================================
+                 控制面板：搜尋、排序、篩選
+                 ========================================== -->
+            <div class="control-panel mb-3">
+                
+                <!-- 隱藏欄位：儲存排序方式 -->
+                <input type="hidden" id="sort-value" value="dim">
+
+                <!-- 頂部列：搜尋框 + 排序選單 + 檢視切換 -->
+                <div class="panel-top-row">
+                    
+                    <!-- 搜尋框 -->
+                    <div class="search-box">
+                        <i class="fas fa-search" style="color:var(--text-muted)"></i>
+                        <input type="text" id="search-input" class="search-input" placeholder="搜尋課名、老師..." oninput="renderCourses()">
                     </div>
-                    <div class="col-md-4 col-12">
-                        <div class="input-group sort-wrapper">
-                            <label class="input-group-text bg-transparent border-secondary text-muted transition-effect" for="sort-select">⇅ 排序</label>
-                            <select class="form-select border-secondary transition-effect" id="sort-select" onchange="renderCourses()" style="background: var(--bg-body); color: var(--text-main);">
-                                <option value="dim" selected>依向度</option>
-                                <option value="time">依時間</option>
-                            </select>
+
+                    <!-- 右側控制群組 -->
+                    <div class="top-right-group">
+                        
+                        <!-- 自訂排序下拉選單 -->
+                        <div class="custom-select" id="sortSelect">
+                            <div class="select-trigger">
+                                <span class="trigger-text">排序：依向度</span>
+                                <i class="fas fa-chevron-down select-arrow"></i>
+                            </div>
+                            <div class="select-options">
+                                <div class="option selected" data-value="dim">
+                                    <i class="fas fa-layer-group"></i> 依向度
+                                </div>
+                                <div class="option" data-value="time">
+                                    <i class="far fa-clock"></i> 依時間
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 檢視模式切換按鈕 -->
+                        <div class="view-toggle" id="view-toggle">
+                            <div class="toggle-glider"></div> <!-- 滑動指示器 -->
+                            <button class="toggle-btn active" id="btn-grid" onclick="setViewMode('grid')">
+                                <i class="fas fa-th-large"></i> 方格
+                            </button>
+                            <button class="toggle-btn" id="btn-list" onclick="setViewMode('list')">
+                                <i class="fas fa-list"></i> 列表
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-3 col-12">
-                        <div class="btn-group w-100" role="group">
-                            <button type="button" class="btn btn-outline-secondary view-btn active" id="btn-grid" onclick="setViewMode('grid')">⊞ 方格</button>
-                            <button type="button" class="btn btn-outline-secondary view-btn" id="btn-list" onclick="setViewMode('list')">☰ 列表</button>
+                </div>
+
+                <!-- ==========================================
+                     篩選按鈕區
+                     ========================================== -->
+                <div class="panel-filter-row">
+                    
+                    <!-- 向度篩選群組 -->
+                    <div class="filter-group">
+                        <div class="filter-label">
+                            <i class="fas fa-layer-group"></i>
                         </div>
+                        <button class="chip-btn dim-type" value="向度一" onclick="toggleFilter(this)">向度一</button>
+                        <button class="chip-btn dim-type" value="向度二" onclick="toggleFilter(this)">向度二</button>
+                        <button class="chip-btn dim-type" value="向度三" onclick="toggleFilter(this)">向度三</button>
+                        <button class="chip-btn dim-type" value="向度四" onclick="toggleFilter(this)">向度四</button>
+                        <button class="chip-btn dim-type" value="向度五" onclick="toggleFilter(this)">向度五</button>
+                        <button class="chip-btn dim-type" value="向度六" onclick="toggleFilter(this)">向度六</button>
                     </div>
-                    <div class="col-12 mt-2">
-                        <div id="dimension-filters"></div>
+
+                    <!-- 星期篩選群組 -->
+                    <div class="filter-group">
+                        <div class="filter-label">
+                            <i class="far fa-clock"></i>
+                        </div>
+                        <button class="chip-btn time-type" value="一" onclick="toggleFilter(this)">週一</button>
+                        <button class="chip-btn time-type" value="二" onclick="toggleFilter(this)">週二</button>
+                        <button class="chip-btn time-type" value="三" onclick="toggleFilter(this)">週三</button>
+                        <button class="chip-btn time-type" value="四" onclick="toggleFilter(this)">週四</button>
+                        <button class="chip-btn time-type" value="五" onclick="toggleFilter(this)">週五</button>
                     </div>
                 </div>
             </div>
-
+            
+            <!-- 搜尋結果數量顯示 -->
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-muted small" id="result-count">載入中...</span>
             </div>
             
+            <!-- 課程列表容器（動態生成內容） -->
             <div class="row g-3" id="course-list"></div>
         </div>
     </div>
 </div>
 
-<footer class="text-center py-4 mt-4" style="border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem;">
-    <div class="container">
-        <div class="mb-1">
-            © 2025 黃振彰 · <a href="https://github.com/huangzz02" target="_blank" class="footer-link">GitHub</a>
-        </div>
+<!-- ==========================================
+     課程詳細資料彈窗 (Bootstrap Modal)
+     用途：顯示單一課程的完整資訊
+     ========================================== -->
+<div class="modal-overlay" id="courseDetailModal" onclick="closeModal()">
+    <div class="custom-modal" onclick="event.stopPropagation()">
         
+        <header class="custom-modal-header">
+            <h2 class="modal-title" id="modalTitle" style="font-size: 20px; margin-bottom: 6px;">課程名稱</h2>
+            <div class="d-flex align-items-center gap-2" style="font-size: 14px; color: var(--text-gray);">
+                <div class="detail-value-mono">
+                    <span class="badge badge-lang" id="modalId">ID</span>
+                </div>
+                <span id="modalDimWrapper" class="badge badge-dim">向度</span>
+            </div>
+        </header>
+
+        <div class="custom-modal-body">
+            
+            <div class="detail-item">
+                <div class="detail-label">授課教師</div>
+                <div class="detail-value" id="modalTeacher"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">上課時間</div>
+                <div class="detail-value" id="modalTime"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">上課地點</div>
+                <div class="detail-value" id="modalRoom"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">學分數</div>
+                <div class="detail-value" id="modalCredit"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">課程名額</div>
+                <div class="detail-value" id="modalQuotaGroup"></div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">授課語言</div>
+                <div class="detail-value" id="modalLang"></div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">可否加簽</div>
+                <div class="detail-value" id="modalCanAdd"></div>
+            </div>
+
+            <div id="modalNoteContainer" class="d-none mt-3">
+                <div class="note-box" style="flex-direction: column; gap: 4px;">
+                    <div class="modal-note-title-row" style="font-weight: 700; display:flex; align-items:center; gap:6px;">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                        選課備註
+                    </div>
+                    <div style="padding-left: 2px; line-height: 1.6;" id="modalNote"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="custom-modal-footer">
+            <a href="#" target="_blank" id="modalSearchBtn" class="btn btn-ghost">
+                查看評價 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <button type="button" class="btn btn-primary" onclick="closeModal()">關閉視窗</button>
+        </footer>
+    </div>
+</div>
+
+<!-- ==========================================
+     頁尾
+     用途：顯示版權資訊和瀏覽統計
+     ========================================== -->
+<footer class="text-center py-4 mt-4" style="border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem;">
+    <div class="container">
+        <!-- 版權聲明 -->
+        <div class="mb-1">
+            © 2026 黃振彰 · <a href="https://github.com/huangzz02" target="_blank" class="footer-link">GitHub</a>
+        </div>
+        <!-- 不蒜子瀏覽統計 -->
         <div id="busuanzi_container_site_pv" style="opacity: 0.7; font-size: 0.75rem;">
             瀏覽次數： <span id="busuanzi_value_site_pv"></span>
         </div>
     </div>
-    
+    <!-- 不蒜子統計腳本 -->
     <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="data.js"></script>
-<script src="script.js"></script>
+<!-- ==========================================
+     外部 JavaScript 資源
+     ========================================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script> <!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script> <!-- Driver.js JS -->
+<script src="data.js"></script> <!-- 課程資料 -->
+<script src="script.js"></script> <!-- 主要功能腳本 -->
 
 </body>
 </html>
